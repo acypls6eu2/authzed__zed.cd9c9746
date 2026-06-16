@@ -227,8 +227,8 @@ func DialOptsFromFlags(cmd *cobra.Command, token storage.Token) ([]grpc.DialOpti
 	retryOpts := []retry.CallOption{
 		retry.WithBackoff(retry.BackoffExponentialWithJitterBounded(defaultRetryExponentialBackoff,
 			defaultRetryJitterFraction, defaultMaxRetryAttemptDuration)),
-		retry.WithCodes(codes.ResourceExhausted, codes.Unavailable, codes.Aborted, codes.Unknown),
-		retry.WithMax(maxRetries + 1),
+		retry.WithCodes(codes.ResourceExhausted, codes.Unavailable, codes.Aborted, codes.Unknown, codes.Internal),
+		retry.WithMax(maxRetries),
 		retry.WithOnRetryCallback(func(_ context.Context, attempt uint, err error) {
 			log.Error().Err(err).Uint("attempt", attempt).Msg("retrying gRPC call")
 		}),
@@ -290,7 +290,7 @@ func DialOptsFromFlags(cmd *cobra.Command, token storage.Token) ([]grpc.DialOpti
 	}
 
 	maxMessageSize := cobrautil.MustGetInt(cmd, "max-message-size")
-	if maxMessageSize > 0 {
+	if maxMessageSize != 0 {
 		opts = append(opts, grpc.WithDefaultCallOptions(
 			// The default max client message size is 4mb.
 			// It's conceivable that a sufficiently complex
