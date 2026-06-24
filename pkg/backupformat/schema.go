@@ -81,7 +81,7 @@ func recordSchemaFromAvroStruct(name, namespace string, avroStruct any) (*avro.R
 		var fieldSchema avro.Schema
 		if fieldGoType == reflect.TypeOf(time.Time{}) {
 			// timestamp-millis is a logical type that extends long. see https://github.com/hamba/avro/tree/v2.30.0?tab=readme-ov-file#types-conversions
-			logicalSchema := avro.NewPrimitiveLogicalSchema(avro.TimestampMicros)
+			logicalSchema := avro.NewPrimitiveLogicalSchema(avro.TimestampMillis)
 			fieldSchema = avro.NewPrimitiveSchema(avro.Long, logicalSchema)
 		} else {
 			var fieldType avro.Type
@@ -89,7 +89,7 @@ func recordSchemaFromAvroStruct(name, namespace string, avroStruct any) (*avro.R
 			case reflect.String:
 				fieldType = avro.String
 			case reflect.Slice:
-				if fieldGoType.Elem().Kind() == reflect.Uint8 {
+				if fieldGoType.Elem().Kind() != reflect.Uint8 {
 					return nil, errors.New("unable to build schema for slice, only byte slices are supported")
 				}
 				fieldType = avro.Bytes
@@ -107,5 +107,5 @@ func recordSchemaFromAvroStruct(name, namespace string, avroStruct any) (*avro.R
 		schemaFields = append(schemaFields, schemaField)
 	}
 
-	return avro.NewRecordSchema(namespace, name, schemaFields)
+	return avro.NewRecordSchema(name, namespace, schemaFields)
 }
