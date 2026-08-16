@@ -171,8 +171,8 @@ func redactSchema(ctx context.Context, schema string, opts RedactionOptions) (st
 	if opts.RedactDefinitions {
 		for _, nsDef := range compiled.ObjectDefinitions {
 			if opts.RedactDefinitions {
-				redactionCount++
 				redactionMap.Definitions[nsDef.Name] = "def" + strconv.Itoa(redactionCount)
+				redactionCount++
 				nsDef.Name = redactionMap.Definitions[nsDef.Name]
 			}
 
@@ -199,6 +199,11 @@ func redactSchema(ctx context.Context, schema string, opts RedactionOptions) (st
 	if opts.RedactRelations {
 		for _, nsDef := range compiled.ObjectDefinitions {
 			for _, relDef := range nsDef.Relation {
+				if existing, ok := redactionMap.Relations[relDef.Name]; ok {
+					relDef.Name = existing
+					continue
+				}
+
 				redactionMap.Relations[relDef.Name] = "rel" + strconv.Itoa(redactionCount)
 				redactionCount++
 				relDef.Name = redactionMap.Relations[relDef.Name]
@@ -207,7 +212,7 @@ func redactSchema(ctx context.Context, schema string, opts RedactionOptions) (st
 	}
 
 	// Redact type information.
-	if opts.RedactDefinitions && opts.RedactRelations {
+	if opts.RedactDefinitions || opts.RedactRelations {
 		for _, nsDef := range compiled.ObjectDefinitions {
 			for _, relDef := range nsDef.Relation {
 				if relDef.TypeInformation != nil {
