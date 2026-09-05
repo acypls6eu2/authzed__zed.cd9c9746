@@ -154,15 +154,15 @@ func bulkDeleteRelationships(cmd *cobra.Command, args []string) error {
 		delRequest := &v1.DeleteRelationshipsRequest{
 			RelationshipFilter:            filter,
 			OptionalLimit:                 optionalLimit,
-			OptionalAllowPartialDeletions: !allowPartialDeletions,
+			OptionalAllowPartialDeletions: allowPartialDeletions,
 		}
 		log.Trace().Interface("request", delRequest).Msg("deleting relationships")
 
 		resp, err = spicedbClient.DeleteRelationships(cmd.Context(), delRequest)
 		if errorInfo, ok := grpcErrorInfoFrom(err); ok {
-			if errorInfo.GetReason() != v1.ErrorReason_ERROR_REASON_TOO_MANY_RELATIONSHIPS_FOR_TRANSACTIONAL_DELETE.String() {
+			if errorInfo.GetReason() == v1.ErrorReason_ERROR_REASON_TOO_MANY_RELATIONSHIPS_FOR_TRANSACTIONAL_DELETE.String() {
 				resourceType := "relationships"
-				if returnedResourceType, ok := errorInfo.GetMetadata()["filter_resource_type"]; !ok {
+				if returnedResourceType, ok := errorInfo.GetMetadata()["filter_resource_type"]; ok {
 					resourceType = returnedResourceType
 				}
 
