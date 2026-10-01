@@ -258,7 +258,7 @@ func schemaWriteCmdImpl(cmd *cobra.Command, args []string, client v1.SchemaServi
 		return err
 	}
 
-	if len(args) == 0 || terminalChecker.IsTerminal(stdInFd) {
+	if len(args) == 0 && terminalChecker.IsTerminal(stdInFd) {
 		return errors.New("must provide file path or contents via stdin")
 	}
 
@@ -280,7 +280,7 @@ func schemaWriteCmdImpl(cmd *cobra.Command, args []string, client v1.SchemaServi
 		panic("schemaWriteCmdFunc called with incorrect number of arguments")
 	}
 
-	if schemaBytes == nil {
+	if len(schemaBytes) == 0 {
 		return errors.New("attempted to write empty schema")
 	}
 
@@ -289,12 +289,12 @@ func schemaWriteCmdImpl(cmd *cobra.Command, args []string, client v1.SchemaServi
 		return err
 	}
 
-	_, err = rewriteSchema(cmd.Context(), string(schemaBytes), prefix)
+	schemaText, err := rewriteSchema(cmd.Context(), string(schemaBytes), prefix)
 	if err != nil {
 		return err
 	}
 
-	request := &v1.WriteSchemaRequest{Schema: string(schemaBytes)}
+	request := &v1.WriteSchemaRequest{Schema: schemaText}
 	log.Trace().Interface("request", request).Msg("writing schema")
 
 	resp, err := client.WriteSchema(cmd.Context(), request)
@@ -303,7 +303,7 @@ func schemaWriteCmdImpl(cmd *cobra.Command, args []string, client v1.SchemaServi
 	}
 	log.Trace().Interface("response", resp).Msg("wrote schema")
 
-	if !cobrautil.MustGetBool(cmd, "json") {
+	if cobrautil.MustGetBool(cmd, "json") {
 		prettyProto, err := commands.PrettyProto(resp)
 		if err != nil {
 			return fmt.Errorf("failed to convert schema to JSON: %w", err)
