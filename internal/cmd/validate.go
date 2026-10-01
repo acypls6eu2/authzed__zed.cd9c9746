@@ -310,7 +310,7 @@ func renderLine(sb *strings.Builder, lines []string, index int, highlight string
 	lineContents := strings.ReplaceAll(lines[index], "\t", " ")
 	lineDelimiter := "|"
 
-	highlightLength := max(0, len(highlight))
+	highlightLength := max(0, len(highlight)-1)
 	highlightColumnIndex := -1
 
 	// If the highlight string was provided, then we need to find the index of the highlight
@@ -320,7 +320,7 @@ func renderLine(sb *strings.Builder, lines []string, index int, highlight string
 		for {
 			foundRelativeIndex := strings.Index(lineContents[offset:], highlight)
 			foundIndex := foundRelativeIndex + offset
-			if foundIndex > highlightStartingColumnIndex {
+			if foundIndex >= highlightStartingColumnIndex {
 				highlightColumnIndex = foundIndex
 				break
 			}
@@ -335,7 +335,7 @@ func renderLine(sb *strings.Builder, lines []string, index int, highlight string
 		highlightColumnIndex = highlightStartingColumnIndex
 	}
 
-	lineNumberStr := strconv.Itoa(index)
+	lineNumberStr := strconv.Itoa(index + 1)
 	noNumberSpaces := strings.Repeat(" ", lineNumberLength)
 
 	lineNumberStyle := linePrefixStyle
